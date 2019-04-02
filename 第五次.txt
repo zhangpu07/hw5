@@ -1,0 +1,238 @@
+附录
+1.	butter worth低通滤波器
+%%butterworth低通滤波器函数
+function [image_out,F1,BW,G] = Butterworth(image_in,D0,N)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+        fp(i,j) = double(image_in(i,j)) ;
+        %对数据类型进行变换，防止运算时溢出
+    end
+end
+%对图像进行填充
+ F1 = fftshift(fft2(fp));
+%对图像进行傅里叶变换，并对其傅里叶进行中心化
+BW = zeros(P,Q);
+a = D0 ^(2 * N);
+for u = 1 : P 
+    for v= 1 : Q
+        temp = (u-(m+1.0))^2 + (v-(n+1.0))^2;
+        BW(u,v) = 1/(1 + (temp)^N / a) ;
+    end
+end
+G = F1.* BW;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+ for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range); %归一化  
+    end
+end   
+end
+2.	guassian滤波器
+%%guassian低通滤波器函数
+function [image_out,F1,GS,G] = Gaussian(image_in,D0)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+    end
+end
+F1 = fftshift(fft2(fp));
+GS = zeros(P,Q);
+for u = 1 : P 
+    for v= 1 : Q
+ 
+          D(u,v)=sqrt((u-fix(P/2))^2+(v-fix(Q/2))^2);
+          GS(u,v)=exp(-D(u,v)^2/(2*D0^2));
+ 
+    end
+end
+G = F1.* GS;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+ 
+for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range);
+    end
+end
+end
+3.	butterworth高通滤波器
+function [image_out,F1,BW,G] = Butterworth(image_in,D0,N)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+        fp(i,j) = double(image_in(i,j)) ;
+    end
+end
+F1 = fftshift(fft2(fp));
+BW = zeros(P,Q);
+a = D0 ^(2 * N);
+for u = 1 : P 
+    for v= 1 : Q
+        temp = (u-(m+1.0))^2 + (v-(n+1.0))^2;
+        BW(u,v) = 1/(1 + a/(temp)^N  ) ;
+    end
+end
+G = F1.* BW;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range);
+    end
+end
+end
+4.	 guassian高通滤波器
+function [image_out,F1,GS,G] = Gaussian(image_in,D0)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+        fp(i,j) = double(image_in(i,j)) ;
+     end
+end
+F1 = fftshift(fft2(fp));
+GS = zeros(P,Q);
+for u = 1 : P 
+    for v= 1 : Q
+ 
+          D(u,v)=sqrt((u-fix(P/2))^2+(v-fix(Q/2))^2);
+          GS(u,v)=1 - exp(-D(u,v)^2/(2*D0^2));
+ 
+    end
+end
+G = F1.* GS;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+ 
+for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range);
+    end
+end
+end
+5.	Laplace 滤波器
+function [image_out,F1,LP,G] = Laplace(image_in)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+        fp(i,j) = double(image_in(i,j)) ;
+     end
+end
+F1 = fftshift(fft2(fp));
+LP = zeros(P,Q);
+for u = 1 : P 
+    for v= 1 : Q
+       D(u,v)=sqrt((u-fix(P/2))^2+(v-fix(Q/2))^2);
+        LP(u,v)=1+4*pi^2*D(u,v)^2;
+    end
+end
+G = F1.* LP;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range);
+    end
+end
+end
+6.	Unmask滤波器
+function [image_out,F1,US,G] = Unmask(image_in,D0)
+ [m, n] = size(image_in);
+P = 2 * m;
+Q = 2 * n;
+fp = zeros(P,Q);
+for i = 1 : m
+    for j= 1 : n
+        fp(i,j) = double(image_in(i,j)) ;
+    end
+end
+F1 = fftshift(fft2(fp));
+US = zeros(P,Q);
+for u = 1 : P 
+    for v= 1 : Q
+           D(u,v)=sqrt((u-fix(P/2))^2+(v-fix(Q/2))^2);
+        H(u,v)=1-exp(-D(u,v)^2/(2*D0^2)); 
+        US(u,v)=1+H(u,v);
+    end
+end
+G = F1.* US;
+gp = real(ifft2(G));
+image_out = zeros(m, n, 'uint8');
+g = zeros(m, n);
+ for i = 1 : m
+    for j = 1 : n
+        g(i,j) = gp(i,j) * (-1) ^(i+j);
+    end
+end
+mmax = max(g(:));
+mmin = min(g(:));
+range = mmax-mmin;
+for i = 1 : m
+    for j = 1 : n
+        image_out(i,j) = uint8(255 * (g(i, j)-mmin) / range);
+    end
+end
+end
+ 
+
